@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — SafeRoute AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>">
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- ── Left Panel ── -->
+  <div class="auth-panel-left">
+    <div class="auth-left-content">
+
+      <div class="auth-left-logo">
+        <div class="logo-icon">🚦</div>
+        SafeRoute AI
+      </div>
+
+      <h2 class="auth-left-headline">
+        Be a road safety<br>hero today.
+      </h2>
+
+      <p class="auth-left-desc">
+        Create your free account and start reporting road hazards in your city.
+        Every report makes our roads a little safer.
+      </p>
+
+      <ul class="auth-feature-list">
+        <li>
+          <span class="check">✓</span>
+          <span>Free account, no credit card needed</span>
+        </li>
+        <li>
+          <span class="check">✓</span>
+          <span>Report in under 30 seconds</span>
+        </li>
+        <li>
+          <span class="check">✓</span>
+          <span>See hazards reported by your community</span>
+        </li>
+        <li>
+          <span class="check">🤖</span>
+          <span>AI-powered predictions coming soon</span>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ── Right Panel (Form) ── -->
+  <div class="auth-panel-right">
+    <div class="auth-form-container">
+
+      <div class="auth-form-header">
+        <h1 class="auth-form-title">Create account</h1>
+        <p class="auth-form-subtitle">Join the SafeRoute AI community</p>
+      </div>
+
+      <div class="auth-form">
+
+        <!-- Error message -->
+        {% if error %}
+        <div class="form-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="/signup">
+
+          <div class="form-group">
+            <label class="form-label" for="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="form-control"
+              placeholder="Arjun Sharma"
+              required
+              autocomplete="name"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-control"
+              placeholder="you@example.com"
+              required
+              autocomplete="email"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-control"
+              placeholder="Min. 6 characters"
+              required
+              minlength="6"
+              autocomplete="new-password"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirm_password">Confirm Password</label>
+            <input
+              type="password"
+              id="confirm_password"
+              name="confirm_password"
+              class="form-control"
+              placeholder="Repeat your password"
+              required
+              autocomplete="new-password"
+            >
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top: 4px;">
+            Create Account →
+          </button>
+
+        </form>
+
+        <div class="form-divider">or</div>
+
+        <div style="text-align: center;">
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            Already have an account?
+            <a href="/login" style="font-weight: 600;">Sign in →</a>
+          </p>
+        </div>
+
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="/" style="font-size: 0.85rem; color: var(--text-muted);">← Back to Home</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Client-side password confirmation check -->
+<script>
+  document.querySelector("form").addEventListener("submit", function(e) {
+    const pw  = document.getElementById("password").value;
+    const cpw = document.getElementById("confirm_password").value;
+    if (pw !== cpw) {
+      e.preventDefault();
+      // Show inline error
+      const existing = document.querySelector(".form-error");
+      if (existing) existing.remove();
+
+      const err = document.createElement("div");
+      err.className = "form-error";
+      err.textContent = "Passwords do not match.";
+      this.prepend(err);
+    }
+  });
+</script>
+
+</body>
+</html>

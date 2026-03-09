@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — SafeRoute AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>">
+</head>
+<body class="dashboard-layout">
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+
+    <!-- Brand -->
+    <a href="/" class="navbar-brand" style="text-decoration:none; color: var(--text);">
+      <div class="brand-icon">🚦</div>
+      SafeRoute AI
+      <span class="ai-tag">AI</span>
+    </a>
+
+    <!-- User + Actions -->
+    <div class="navbar-actions">
+      <div class="nav-user">
+        <div class="nav-avatar">{{ user.name[0].upper() }}</div>
+        <span>{{ user.name }}</span>
+      </div>
+      <a href="/logout" class="btn btn-ghost btn-sm">Logout</a>
+    </div>
+
+  </div>
+</nav>
+
+
+<!-- ── Dashboard Header ── -->
+<div class="dashboard-header">
+  <div class="container">
+    <div class="dashboard-header-inner">
+      <div>
+        <div class="dashboard-welcome">Good day, {{ user.name.split()[0] }} 👋</div>
+        <h1 class="dashboard-title">SafeRoute AI</h1>
+        <p class="dashboard-subtitle">Smart Road Hazard Reporting System</p>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <!-- Future: map toggle button -->
+        <button class="btn btn-outline btn-sm" onclick="loadHazards()" title="Refresh">
+          ↻ Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Main Content ── -->
+<main style="padding-bottom: 60px;">
+  <div class="container">
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#EFF6FF;">📊</div>
+        <div class="stat-card-info">
+          <div class="stat-card-value" id="stat-total">{{ hazards|length }}</div>
+          <div class="stat-card-label">Total Reports</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#E0F2FE;">🌊</div>
+        <div class="stat-card-info">
+          <div class="stat-card-value" id="stat-water">
+            {{ hazards | selectattr('type', 'equalto', 'Waterlogging') | list | length }}
+          </div>
+          <div class="stat-card-label">Waterlogging</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#FFF5F5;">🚨</div>
+        <div class="stat-card-info">
+          <div class="stat-card-value" id="stat-accident">
+            {{ hazards | selectattr('type', 'equalto', 'Accident') | list | length }}
+          </div>
+          <div class="stat-card-label">Accidents</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#FFFBEB;">🕳️</div>
+        <div class="stat-card-info">
+          <div class="stat-card-value" id="stat-pothole">
+            {{ hazards | selectattr('type', 'equalto', 'Pothole / Bad Road') | list | length }}
+          </div>
+          <div class="stat-card-label">Potholes</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 2-Column Grid -->
+    <div class="dashboard-grid">
+
+      <!-- ── Left: Report Form ── -->
+      <aside>
+        <div class="card report-form-card">
+          <div class="card-header">
+            <span class="card-title">🚨 Report New Hazard</span>
+          </div>
+          <div class="card-body">
+
+            <form id="report-form" autocomplete="off">
+
+              <!-- Hidden input for hazard type (set by visual picker) -->
+              <input type="hidden" id="hazard-type-input" name="type">
+
+              <!-- Visual Hazard Type Picker -->
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label">Hazard Type</label>
+                <div class="hazard-type-select">
+
+                  <button
+                    type="button"
+                    class="hazard-type-btn"
+                    data-type="Waterlogging"
+                    data-active-class="active-water"
+                  >
+                    <span class="htype-icon">🌊</span>
+                    Waterlogging
+                  </button>
+
+                  <button
+                    type="button"
+                    class="hazard-type-btn"
+                    data-type="Accident"
+                    data-active-class="active-accident"
+                  >
+                    <span class="htype-icon">🚨</span>
+                    Accident
+                  </button>
+
+                  <button
+                    type="button"
+                    class="hazard-type-btn"
+                    data-type="Pothole / Bad Road"
+                    data-active-class="active-pothole"
+                    style="grid-column: 1 / -1;"
+                  >
+                    <span class="htype-icon">🕳️</span>
+                    Pothole / Bad Road
+                  </button>
+
+                </div>
+              </div>
+
+              <!-- Location -->
+              <div class="form-group">
+                <label class="form-label" for="location">Location Name</label>
+                <input
+                  type="text"
+                  id="location"
+                  class="form-control"
+                  placeholder="e.g. MG Road, Near Metro Station"
+                  required
+                >
+                <!-- Future: <button type="button" onclick="getUserLocation()">📍 Use GPS</button> -->
+              </div>
+
+              <!-- Description -->
+              <div class="form-group">
+                <label class="form-label" for="description">Description</label>
+                <textarea
+                  id="description"
+                  class="form-control"
+                  placeholder="Describe the hazard briefly..."
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+
+              <!-- Submit -->
+              <button type="submit" class="submit-btn">
+                🚨 Report Hazard
+              </button>
+
+            </form>
+
+          </div>
+        </div>
+
+        <!-- Map placeholder for future integration -->
+        <div class="card" style="margin-top: 20px; overflow: hidden;">
+          <div style="
+            background: linear-gradient(135deg, #1565C0 0%, #1E88E5 100%);
+            padding: 28px;
+            text-align: center;
+            color: white;
+          ">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🗺️</div>
+            <div style="font-family: 'Syne',sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 6px;">
+              Map View — Coming Soon
+            </div>
+            <div style="font-size: 0.82rem; opacity: 0.75; line-height: 1.5;">
+              Interactive hazard map with real-time markers and AI-powered safe route suggestions.
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+
+      <!-- ── Right: Hazard List ── -->
+      <section>
+        <div class="hazard-list-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <h2 class="hazard-list-title">Live Hazard Reports</h2>
+            <span class="hazard-count-badge" id="hazard-count">
+              {{ hazards|length }} report{{ 's' if hazards|length != 1 else '' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="filter-tabs" style="margin-bottom: 20px;">
+          <button class="filter-tab active" data-filter="All">All</button>
+          <button class="filter-tab" data-filter="Waterlogging">🌊 Waterlogging</button>
+          <button class="filter-tab" data-filter="Accident">🚨 Accidents</button>
+          <button class="filter-tab" data-filter="Pothole / Bad Road">🕳️ Potholes</button>
+        </div>
+
+        <!-- Hazards list (dynamically rendered by JS) -->
+        <div id="hazards-list">
+          <!-- Server-side initial render for no-JS fallback -->
+          {% if hazards %}
+            {% for h in hazards %}
+            <div class="hazard-card">
+              <div class="hazard-card-top">
+                <span class="hazard-type-badge
+                  {% if 'Water' in h.type %}badge-water
+                  {% elif 'Accident' in h.type %}badge-accident
+                  {% else %}badge-pothole{% endif %}">
+                  {% if 'Water' in h.type %}🌊
+                  {% elif 'Accident' in h.type %}🚨
+                  {% else %}🕳️{% endif %}
+                  {{ h.type }}
+                </span>
+                <span class="hazard-time">{{ h.timestamp }}</span>
+              </div>
+              <div class="hazard-location">{{ h.location }}</div>
+              <div class="hazard-desc">{{ h.description }}</div>
+              <div class="hazard-footer">
+                <div class="hazard-reporter">
+                  <div class="reporter-avatar">
+                    {{ h.user[0].upper() if h.user else '?' }}
+                  </div>
+                  <span>Reported by <strong>{{ h.user }}</strong></span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <div class="empty-state-icon">🛣️</div>
+            <h3>No hazards reported yet</h3>
+            <p>Be the first to report a road hazard in your area.</p>
+          </div>
+          {% endif %}
+        </div>
+
+      </section>
+
+    </div><!-- /dashboard-grid -->
+  </div><!-- /container -->
+</main>
+
+<!-- Toast container (appended by JS) -->
+<div id="toast-container" class="toast-container"></div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
