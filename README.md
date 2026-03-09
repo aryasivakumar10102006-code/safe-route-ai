@@ -1,4 +1,4 @@
-# safe-route-ai
+
 # SafeRoute AI 🚦
 
 SafeRoute AI is a **road hazard reporting platform** that allows users to report and monitor dangerous road conditions such as **potholes, accidents, and waterlogged roads**.
